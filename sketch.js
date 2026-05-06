@@ -1,4 +1,5 @@
 let games = [];
+let currentGame = null;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -29,8 +30,6 @@ function setup() {
   for (let g of games) {
     g.w = 220;
     g.h = 70;
-    g.btnW = 80;
-    g.btnH = 30;
   }
 }
 
@@ -44,12 +43,16 @@ function draw() {
   textSize(32);
   text("🌌 USG", width / 2, 50);
 
-  drawGrid();
+  if (!currentGame) {
+    drawGrid();
+  } else {
+    drawGameFrame();
+  }
 }
 
 function drawStars() {
   stroke(255);
-  for (let i = 0; i < 90; i++) {
+  for (let i = 0; i < 80; i++) {
     point(random(width), random(height));
   }
 }
@@ -71,7 +74,6 @@ function drawGrid() {
     g.x = x;
     g.y = y;
 
-    // card
     fill(20);
     rect(x, y, g.w, g.h, 12);
 
@@ -84,7 +86,7 @@ function drawGrid() {
     g.btnY = y + 40;
 
     fill(0, 200, 255);
-    rect(g.btnX, g.btnY, g.btnW, g.btnH, 8);
+    rect(g.btnX, g.btnY, 80, 30, 8);
 
     fill(0);
     textSize(12);
@@ -92,15 +94,46 @@ function drawGrid() {
   }
 }
 
+function drawGameFrame() {
+  // back button
+  fill(255, 50, 50);
+  rect(20, 20, 100, 40, 8);
+
+  fill(255);
+  textSize(14);
+  text("BACK", 70, 45);
+
+  // iframe overlay (real embed)
+  let iframe = select("#gameFrame");
+
+  if (!iframe) {
+    iframe = createElement("iframe");
+    iframe.id("gameFrame");
+    iframe.position(0, 0);
+    iframe.size(windowWidth, windowHeight);
+    iframe.style("border", "none");
+  }
+
+  iframe.attribute("src", currentGame.url);
+}
+
 function mousePressed() {
+  if (currentGame) {
+    // back button
+    if (mouseX > 20 && mouseX < 120 && mouseY > 20 && mouseY < 60) {
+      currentGame = null;
+    }
+    return;
+  }
+
   for (let g of games) {
     if (
       mouseX > g.btnX &&
-      mouseX < g.btnX + g.btnW &&
+      mouseX < g.btnX + 80 &&
       mouseY > g.btnY &&
-      mouseY < g.btnY + g.btnH
+      mouseY < g.btnY + 30
     ) {
-      window.open(g.url, "_blank");
+      currentGame = g;
     }
   }
 }
